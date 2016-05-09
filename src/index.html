@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+
+    <style type="text/css">
+        .message {
+            padding-top: 20px;
+        }
+        input, div {
+            font-size: large;
+        }
+    </style>
+</head>
+<body>
+Hello from html
+
+<form action="#" onsubmit="return handleSubmit()">
+    <input type="text" id="chat-msg"/>
+</form>
+
+<div id="container">
+
+</div>
+
+
+
+<script>
+    window.socket = new WebSocket("ws://" + location.host + "/ws");
+
+    function sendMessage(msg){
+        socket.send(msg);
+    }
+
+    function handleSubmit(){
+        var el = document.getElementById("chat-msg");
+        sendMessage(el.value);
+        el.value = '';
+        return false;
+    }
+
+
+    function setupWs(onmessage){
+        socket.onopen = function(){
+            console.log("Connected.");
+            socket.send("Hello, World!");
+        };
+        socket.onclose = function(event){
+            if(event.wasClean){
+                console.log("Closed clean");
+            } else {
+                console.log("Closed unexpected,", event.code, ", ", event.reason );
+            }
+        };
+
+        socket.onmessage = onmessage;
+
+        socket.onerror = function(error){
+            console.log("Error: ", error.message);
+        }
+    }
+
+    setupWs(function(msg){
+        var container =document.getElementById("container");
+        var div = document.createElement("div");
+        div.className = 'message';
+        var textNode = document.createTextNode(msg.data);
+        console.log(event.data);
+        div.appendChild(textNode);
+        container.appendChild(div);
+    });
+
+
+
+</script>
+</body>
+</html>
